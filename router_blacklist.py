@@ -72,25 +72,24 @@ def intToIp(n):
     return str(ipaddress.ip_address(n))
 
 
-blacklist_ip = [f"{random.randint(1,223)}.{random.randint(0,255)}.{random.randint(0,255)}.{random.randint(1,254)}"
-                for _ in range(1000)]
+blacklist_ip = list({
+    f"192.168.{random.randint(0, 255)}.{random.randint(1, 254)}"
+    for _ in range(1000)
+})
 
-
-blacklist_bst = BST()
-blacklist_lista = []   
+blacklist_bst   = BST()
+blacklist_lista = []
 
 for ip in blacklist_ip:
     n = ipToInt(ip)
     blacklist_bst.insert(n)
     blacklist_lista.append(n)
 
-
 ip_bloccati = random.sample(blacklist_ip, 10)
-
 
 ip_permessi = []
 while len(ip_permessi) < 10:
-    nuovo = f"{random.randint(224,254)}.{random.randint(0,255)}.{random.randint(0,255)}.{random.randint(1,254)}"
+    nuovo = f"10.0.{random.randint(0, 255)}.{random.randint(1, 254)}"
     if nuovo not in blacklist_ip:
         ip_permessi.append(nuovo)
 
@@ -98,7 +97,7 @@ pacchetti = []
 for ip in ip_bloccati + ip_permessi:
     pacchetto = {
         "ip_sorgente":        ip,
-        "ip_destinazione":    "10.0.0.1",
+        "ip_destinazione":    "192.168.0.1",
         "porta_sorgente":     random.randint(1024, 65535),
         "porta_destinazione": 80,
         "protocollo":         "TCP",
@@ -106,14 +105,11 @@ for ip in ip_bloccati + ip_permessi:
     }
     pacchetti.append(pacchetto)
 
-
 random.shuffle(pacchetti)
-
 
 coda_pacchetti = Queue()
 for p in pacchetti:
     coda_pacchetti.enqueue(p)
-
 
 print("        CONTROLLO ACCESSI ROUTER")
 
@@ -126,25 +122,22 @@ while not coda_pacchetti.isEmpty():
     ip_intero = ipToInt(ip)
 
     if blacklist_bst.search(ip_intero):
-        print(f" BLOCCATO  | IP: {ip} | Porta: {pacchetto['porta_sorgente']} | {pacchetto['protocollo']}")
+        print(f" BLOCCATO  | IP: {ip}")
         bloccati += 1
     else:
-        print(f" PERMESSO  | IP: {ip} | Porta: {pacchetto['porta_sorgente']} | {pacchetto['protocollo']}")
+        print(f" PERMESSO  | IP: {ip}")
         permessi += 1
-
-
-print(f"  Pacchetti totali : {bloccati + permessi}")
+        
+print(f"\n  Pacchetti totali : {bloccati + permessi}")
 print(f"  Bloccati         : {bloccati}")
 print(f"  Permessi         : {permessi}")
 
-
-ip_da_cercare    = blacklist_ip[0]
+ip_da_cercare     = blacklist_ip[0]
 intero_da_cercare = ipToInt(ip_da_cercare)
 
 inizio_bst = time.perf_counter()
 blacklist_bst.search(intero_da_cercare)
 tempo_bst  = time.perf_counter() - inizio_bst
-
 
 inizio_lista = time.perf_counter()
 intero_da_cercare in blacklist_lista
